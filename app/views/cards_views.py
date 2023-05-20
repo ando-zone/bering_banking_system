@@ -96,6 +96,11 @@ class WithdrawView(MethodView):
             return jsonify(error="Account not found"), 404
 
         amount = request.json.get("amount")
+        account_password = request.json.get("account_password")
+
+        if not account.verify_password(account_password):
+            current_app.logger.error("Invalid account password")
+            return jsonify({"error": "Invalid account password"}), 401
 
         # TODO@Ando: 일정 금액 이상 인출 시, 알림 이용하기. (알림 시스템 구축)
         is_successful, message = card.withdraw(account, amount)
@@ -136,10 +141,10 @@ class DepositView(MethodView):
 
         amount = request.json.get("amount")
 
-        # TODO@Ando: 알림 이용하기. (알림 시스템 구축)
-        print(card.deposit(account, amount))
-
+        message = card.deposit(account, amount)
         db.session.commit()
+
+        current_app.logger.info(message)
 
         return (
             jsonify(
@@ -152,7 +157,6 @@ class DepositView(MethodView):
         )
 
 
-# TODO@Ando: balance도 카드 상태에 따라 제한을 두는 것은 어때?
 class BalanceView(MethodView):
     decorators = [login_required]
 

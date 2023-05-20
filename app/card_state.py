@@ -35,7 +35,7 @@ class Enabled(CardState):
 
     def deposit(self, account: 'app.models.Account', amount: int):
         account.balance += amount
-        return True, f"Depositing {amount} to active card. New balance: {account.balance}"
+        return f"Depositing {amount} to active card. New balance: {account.balance}"
 
 
 class Disabled(CardState):
