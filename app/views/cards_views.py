@@ -27,9 +27,15 @@ class CardView(MethodView):
     def get(self, card_id):
         card = Card.query.get(card_id)
         if card is None:
+            error_msg = "Card not found"
+            current_app.logger.error(error_msg)
+
             return jsonify({"error": "Card not found"}), 404
 
         if not card.verify_owner(g.user):
+            error_msg = "Not authorized"
+            current_app.logger.error(error_msg)
+
             return jsonify({"error": "Not authorized"}), 403
 
         return jsonify(card.to_dict()), 200
@@ -41,16 +47,27 @@ class EnableCardView(MethodView):
     def put(self, card_id):
         card = Card.query.get(card_id)
         if card is None:
+            error_msg = "Card not found"
+            current_app.logger.error(error_msg)
+
             return jsonify({"error": "Card not found"}), 404
 
         if not card.verify_owner(g.user):
+            error_msg = "Not authorized"
+            current_app.logger.error(error_msg)
+
             return jsonify({"error": "Not authorized"}), 403
 
         if isinstance(card.state, Enabled):
-            return jsonify({"error": "The card is already enabled"}), 400
+            warning_msg = "The card is already enabled"
+            current_app.logger.warning(warning_msg)
+
+            return jsonify({"error": warning_msg}), 400
 
         card.enable()
         db.session.commit()
+
+        current_app.logger.info("The card is successfully enabled")
 
         return jsonify(card.to_dict()), 200
 
@@ -61,16 +78,27 @@ class DisableCardView(MethodView):
     def put(self, card_id):
         card = Card.query.get(card_id)
         if card is None:
+            error_msg = "Card not found"
+            current_app.logger.error(error_msg)
+
             return jsonify({"error": "Card not found"}), 404
 
         if not card.verify_owner(g.user):
+            error_msg = "Not authorized"
+            current_app.logger.error(error_msg)
+
             return jsonify({"error": "Not authorized"}), 403
 
         if isinstance(card.state, Disabled):
-            return jsonify({"error": "The card is already disabled"}), 400
+            warning_msg = "The card is already disabled"
+            current_app.logger.warning(warning_msg)
+
+            return jsonify({"warning": warning_msg}), 400
 
         card.disable()
         db.session.commit()
+
+        current_app.logger.info("The card is successfully disabled")
 
         return jsonify(card.to_dict()), 200
 
@@ -81,26 +109,34 @@ class WithdrawView(MethodView):
     def post(self, card_id):
         card = Card.query.get(card_id)
         if card is None:
-            current_app.logger.error("Card not found")
-            return jsonify({"error": "Card not found"}), 404
+            error_msg = "Card not found"
+            current_app.logger.error(error_msg)
+
+            return jsonify({"error": error_msg}), 404
 
         if not card.verify_owner(g.user):
-            current_app.logger.error("Not authorized")
-            return jsonify({"error": "Not authorized"}), 403
+            error_msg = "Not authorized"
+            current_app.logger.error(error_msg)
+
+            return jsonify({"error": error_msg}), 403
 
         account_id = card.account.id
         account = Account.query.get(account_id)
 
         if account is None:
+            error_msg = "Account not found"
             current_app.logger.error("Account not found")
-            return jsonify(error="Account not found"), 404
+
+            return jsonify(error=error_msg), 404
 
         amount = request.json.get("amount")
         account_password = request.json.get("account_password")
 
         if not account.verify_password(account_password):
-            current_app.logger.error("Invalid account password")
-            return jsonify({"error": "Invalid account password"}), 401
+            error_msg = "Invalid account password"
+            current_app.logger.error(error_msg)
+
+            return jsonify({"error": error_msg}), 401
 
         # TODO@Ando: 일정 금액 이상 인출 시, 알림 이용하기. (알림 시스템 구축)
         is_successful, message = card.withdraw(account, amount)
@@ -128,16 +164,25 @@ class DepositView(MethodView):
     def post(self, card_id):
         card = Card.query.get(card_id)
         if card is None:
+            error_msg = "Card not found"
+            current_app.logger.error(error_msg)
+
             return jsonify({"error": "Card not found"}), 404
 
         if not card.verify_owner(g.user):
-            return jsonify({"error": "Not authorized"}), 403
+            error_msg = "Not authorized"
+            current_app.logger.error(error_msg)
+
+            return jsonify({"error": error_msg}), 403
 
         account_id = card.account.id
         account = Account.query.get(account_id)
 
         if account is None:
-            return jsonify(error="Account not found"), 404
+            error_msg = "Account not found"
+            current_app.logger.error(error_msg)
+
+            return jsonify(error=error_msg), 404
 
         amount = request.json.get("amount")
 
@@ -163,10 +208,18 @@ class BalanceView(MethodView):
     def get(self, card_id):
         card = Card.query.get(card_id)
         if card is None:
-            return jsonify({"error": "Card not found"}), 404
+            error_msg = "Card not found"
+            current_app.logger.error(error_msg)
+
+            return jsonify({"error": error_msg}), 404
 
         if not card.verify_owner(g.user):
-            return jsonify({"error": "Not authorized"}), 403
+            error_msg = "Not authorized"
+            current_app.logger.error(error_msg)
+
+            return jsonify({"error": error_msg}), 403
+
+        current_app.logger.info("Balance check successful")
 
         return jsonify({"balance": f"{card.account.balance}"}), 200
 
