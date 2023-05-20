@@ -1,7 +1,6 @@
 import functools
-from flask import Blueprint, jsonify, request, g, redirect, url_for
+from flask import Blueprint, jsonify, request, g, redirect, url_for, current_app
 from flask.views import MethodView
-import app
 from app import db
 from app.models import Card, User, Account
 from app.card_state import Disabled, Enabled
@@ -93,18 +92,18 @@ class WithdrawView(MethodView):
     def post(self, card_id):
         card = Card.query.get(card_id)
         if card is None:
-            app.logger.error("Card not found")
+            current_app.logger.error("Card not found")
             return jsonify({"error": "Card not found"}), 404
 
         if not card.verify_owner(g.user):
-            app.logger.error("Not authorized")
+            current_app.logger.error("Not authorized")
             return jsonify({"error": "Not authorized"}), 403
 
         account_id = card.account.id
         account = Account.query.get(account_id)
 
         if account is None:
-            app.logger.error("Account not found")
+            current_app.logger.error("Account not found")
             return jsonify(error='Account not found'), 404
 
         amount = request.json.get("amount")
@@ -114,9 +113,9 @@ class WithdrawView(MethodView):
         db.session.commit()
 
         if is_successful:
-            app.logger.info(message)
+            current_app.logger.info(message)
         else:
-            app.logger.warning(message)
+            current_app.logger.warning(message)
 
         return (
             jsonify(
