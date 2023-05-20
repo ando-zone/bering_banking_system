@@ -82,21 +82,19 @@ class Account(db.Model):
 
 
 class Card(db.Model):
+    def __init__(self):
+        self.state = Disabled()
+
     id = db.Column(db.Integer, primary_key=True)
     card_number = db.Column(db.String(16), unique=True, nullable=False)  # unique card number
-    status = db.Column(db.String(100), default='disabled')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # reference to the User
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)  # reference to the Account
 
-    @property
-    def state(self):
-        return Enabled() if self.status == 'enabled' else Disabled()
-
     def enable(self):
-        self.status = self.state.enable().__class__.__name__.lower()
+        self.state = Enabled()
 
     def disable(self):
-        self.status = self.state.disable().__class__.__name__.lower()
+        self.state = Disabled()
 
     def verify_owner(self, user):
         return self.user_id == user.id
@@ -113,5 +111,5 @@ class Card(db.Model):
             "user_name": self.user.name,
             "account_id": self.account.id,
             "card_number": self.card_number,
-            "status": self.status
+            "status": self.state.__class__.__name__.lower()
         }

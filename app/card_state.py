@@ -3,14 +3,6 @@ from abc import ABC, abstractmethod
 
 class CardState(ABC):
     @abstractmethod
-    def enable(self):
-        pass
-
-    @abstractmethod
-    def disable(self):
-        pass
-
-    @abstractmethod
     def withdraw(self):
         pass
 
@@ -20,12 +12,6 @@ class CardState(ABC):
 
 
 class Enabled(CardState):
-    def enable(self):
-        return self
-
-    def disable(self):
-        return Disabled()
-
     def withdraw(self, account: 'app.models.Account', amount: int):
         if account.balance >= amount:
             account.balance -= amount
@@ -39,12 +25,6 @@ class Enabled(CardState):
 
 
 class Disabled(CardState):
-    def enable(self):
-        return Enabled()
-        
-    def disable(self):
-        return self
-
     def withdraw(self, account: 'app.models.Account', amount: int):
         return "Cannot withdraw. Card is blocked."
 
