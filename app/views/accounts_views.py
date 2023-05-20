@@ -1,34 +1,13 @@
-import functools
 import random
 
-from flask import Blueprint, request, session, redirect, url_for, jsonify, g
+from flask import Blueprint, request, jsonify, g
 from flask.views import MethodView
 
-from app.models import Account, User, Card, AccountNumber
 from app import db
+from app.models import Account, Card, AccountNumber
+from app.views.auth_views import login_required
 
 bp = Blueprint("accounts", __name__, url_prefix="/accounts")
-
-
-@bp.before_app_request
-def load_logged_in_user():
-    user_id = session.get("user_id")
-
-    if user_id is None:
-        g.user = None
-    else:
-        g.user = User.query.get(user_id)
-
-
-def login_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect(url_for("auth.login"))
-
-        return view(**kwargs)
-
-    return wrapped_view
 
 
 class AccountListView(MethodView):

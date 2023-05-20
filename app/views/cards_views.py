@@ -1,22 +1,14 @@
 import functools
+
 from flask import Blueprint, jsonify, request, g, redirect, url_for, current_app
 from flask.views import MethodView
+
 from app import db
 from app.models import Card, Account
 from app.card_state import Disabled, Enabled
+from app.views.auth_views import login_required
 
 bp = Blueprint('cards', __name__, url_prefix="/cards")
-
-
-def login_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect(url_for("auth.login"))
-
-        return view(**kwargs)
-
-    return wrapped_view
 
 
 class CardListView(MethodView):
