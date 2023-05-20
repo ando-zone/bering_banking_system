@@ -1,6 +1,4 @@
-import functools
-
-from flask import Blueprint, jsonify, request, g, redirect, url_for, current_app
+from flask import Blueprint, jsonify, request, g, current_app
 from flask.views import MethodView
 
 from app import db
@@ -8,7 +6,7 @@ from app.models import Card, Account
 from app.card_state import Disabled, Enabled
 from app.views.auth_views import login_required
 
-bp = Blueprint('cards', __name__, url_prefix="/cards")
+bp = Blueprint("cards", __name__, url_prefix="/cards")
 
 
 class CardListView(MethodView):
@@ -53,7 +51,7 @@ class EnableCardView(MethodView):
 
         card.enable()
         db.session.commit()
-        
+
         return jsonify(card.to_dict()), 200
 
 
@@ -73,7 +71,7 @@ class DisableCardView(MethodView):
 
         card.disable()
         db.session.commit()
-        
+
         return jsonify(card.to_dict()), 200
 
 
@@ -95,7 +93,7 @@ class WithdrawView(MethodView):
 
         if account is None:
             current_app.logger.error("Account not found")
-            return jsonify(error='Account not found'), 404
+            return jsonify(error="Account not found"), 404
 
         amount = request.json.get("amount")
 
@@ -134,7 +132,7 @@ class DepositView(MethodView):
         account = Account.query.get(account_id)
 
         if account is None:
-            return jsonify(error='Account not found'), 404
+            return jsonify(error="Account not found"), 404
 
         amount = request.json.get("amount")
 
@@ -169,10 +167,20 @@ class BalanceView(MethodView):
         return jsonify({"balance": f"{card.account.balance}"}), 200
 
 
-bp.add_url_rule('/', view_func=CardListView.as_view('card'))
-bp.add_url_rule('/<int:card_id>', view_func=CardView.as_view('card_detail'))
-bp.add_url_rule('/<int:card_id>/enable', view_func=EnableCardView.as_view('enable_card'))
-bp.add_url_rule('/<int:card_id>/disable', view_func=DisableCardView.as_view('disable_card'))
-bp.add_url_rule('/<int:card_id>/withdraw', view_func=WithdrawView.as_view('card_withdraw'))
-bp.add_url_rule('/<int:card_id>/deposit', view_func=DepositView.as_view('card_deposit'))
-bp.add_url_rule('/<int:card_id>/balance', view_func=BalanceView.as_view('card_balance'))
+bp.add_url_rule("/", view_func=CardListView.as_view("card"))
+bp.add_url_rule("/<int:card_id>", view_func=CardView.as_view("card_detail"))
+bp.add_url_rule(
+    "/<int:card_id>/enable", view_func=EnableCardView.as_view("enable_card")
+)
+bp.add_url_rule(
+    "/<int:card_id>/disable", view_func=DisableCardView.as_view("disable_card")
+)
+bp.add_url_rule(
+    "/<int:card_id>/withdraw", view_func=WithdrawView.as_view("card_withdraw")
+)
+bp.add_url_rule(
+    "/<int:card_id>/deposit", view_func=DepositView.as_view("card_deposit")
+)
+bp.add_url_rule(
+    "/<int:card_id>/balance", view_func=BalanceView.as_view("card_balance")
+)
