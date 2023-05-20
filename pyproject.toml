@@ -1,0 +1,46 @@
+[tool.pytest.ini_options]
+addopts = "-s -v --tb=auto"
+testpaths = "tests"
+
+env = [
+    "STAGE=testing",
+    "SQLALCHEMY_WARN_20=1"
+]
+
+
+[tool.poetry]
+name = "bering-assignment"
+version = "1.0.0"
+description = "bering-assignment"
+authors = ["Migorithm"]
+readme = "README.md"
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pytest = "*"
+sqlalchemy = "*"
+greenlet = "*"
+httpx = "*"
+uvloop = "*"
+flask = "^2.3.2"
+flask-migrate = "^4.0.4"
+black = "^23.3.0"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "*"
+mypy = "*"
+coverage = "*"
+Faker = "*"
+pytest-asyncio = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-env = "*"
+pytest-dotenv = "*"
+types-requests = "*"
+debugpy = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
