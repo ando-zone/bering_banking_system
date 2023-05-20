@@ -55,11 +55,20 @@ class AccountListView(MethodView):
 
         if error is None:
             # TODO@Ando: config에서 은행 식별 번호 가져오기.
-            account_number = "555511" + ''.join(random.choice('0123456789') for _ in range(7))
+            account_number = "555511" + "".join(
+                random.choice("0123456789") for _ in range(7)
+            )
             while AccountNumber.query.get(account_number) is not None:
-                account_number = "555511" + ''.join(random.choice('0123456789') for _ in range(7))
+                account_number = "555511" + "".join(
+                    random.choice("0123456789") for _ in range(7)
+                )
 
-            new_account = Account(user_id=user_id, name=name, password=password, account_number=account_number)
+            new_account = Account(
+                user_id=user_id,
+                name=name,
+                password=password,
+                account_number=account_number,
+            )
             new_account_number = AccountNumber(number=account_number)
             db.session.add(new_account_number)
             db.session.add(new_account)
@@ -89,7 +98,7 @@ class AccountView(MethodView):
         if account.user_id != g.user.id:
             return jsonify({"error": "Permission denied"}), 403
 
-        return jsonify(account.to_dict()), 200
+        return jsonify(account.to_dict_in_detail()), 200
 
     def put(self, account_id):
         account = Account.query.get(account_id)
@@ -127,7 +136,7 @@ class AccountView(MethodView):
             jsonify(
                 {
                     "message": "Account updated successfully",
-                    "account": account.to_dict(),
+                    "account": account.to_dict_in_detail(),
                 }
             ),
             200,
@@ -148,12 +157,14 @@ class AccountView(MethodView):
         return jsonify({"message": "Account deleted successfully"}), 200
 
 
-class CardListView(MethodView):
+class AccountCardListView(MethodView):
     decorators = [login_required]
 
     def get(self, account_id):
         user_id = g.user.id
-        cards = Card.query.filter_by(user_id=user_id, account_id=account_id).all()
+        cards = Card.query.filter_by(
+            user_id=user_id, account_id=account_id
+        ).all()
 
         cards_list = [card.to_dict() for card in cards]
 
@@ -168,13 +179,15 @@ class CardListView(MethodView):
             error = "Card number is required."
         elif len(card_number) != 16:
             error = "Card number should be 16 digits."
-        elif (
-            Card.query.filter_by(card_number=card_number).first() is not None
-        ):
-            error = "A card with number '{}' is already registered.".format(card_number)
+        elif Card.query.filter_by(card_number=card_number).first() is not None:
+            error = "A card with number '{}' is already registered.".format(
+                card_number
+            )
 
         if error is None:
-            new_card = Card(user_id=user_id, account_id=account_id, card_number=card_number)
+            new_card = Card(
+                user_id=user_id, account_id=account_id, card_number=card_number
+            )
             db.session.add(new_card)
             db.session.commit()
             return (
@@ -190,7 +203,7 @@ class CardListView(MethodView):
         return jsonify({"error": error}), 400
 
 
-class CardView(MethodView): # get, delete
+class AccountCardView(MethodView):
     decorators = [login_required]
 
     def get(self, account_id, card_id):
@@ -218,13 +231,16 @@ class CardView(MethodView): # get, delete
 
         return jsonify({"message": "Card deleted successfully"}), 200
 
+
 bp.add_url_rule("/", view_func=AccountListView.as_view("account_list"))
 bp.add_url_rule(
     "/<int:account_id>", view_func=AccountView.as_view("account_detail")
 )
 bp.add_url_rule(
-    "/<int:account_id>/cards", view_func=CardListView.as_view("card_list")
+    "/<int:account_id>/cards",
+    view_func=AccountCardListView.as_view("account_card_list"),
 )
 bp.add_url_rule(
-    "/<int:account_id>/cards/<int:card_id>", view_func=CardView.as_view("card_detail")
+    "/<int:account_id>/cards/<int:card_id>",
+    view_func=AccountCardView.as_view("account_card_detail"),
 )

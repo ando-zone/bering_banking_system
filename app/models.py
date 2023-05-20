@@ -64,9 +64,20 @@ class Account(db.Model):
         return {
             "id": self.id,
             "account_number": self.account_number,
-            "user_name": self.user.name,
+            "account_owner": self.user.name,
             "name": self.name,
             "balance": self.balance
+        }
+
+    def to_dict_in_detail(self):
+        card_ids = [card.id for card in self.cards]
+        return {
+            "id": self.id,
+            "account_number": self.account_number,
+            "account_owner": self.user.name,
+            "name": self.name,
+            "balance": self.balance,
+            "cards": card_ids
         }
 
 
