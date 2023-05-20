@@ -2,11 +2,10 @@ import functools
 from flask import Blueprint, jsonify, request, g, redirect, url_for, current_app
 from flask.views import MethodView
 from app import db
-from app.models import Card, User, Account
+from app.models import Card, Account
 from app.card_state import Disabled, Enabled
-# from decorators import login_required
 
-bp = Blueprint('card', __name__, url_prefix="/card")
+bp = Blueprint('cards', __name__, url_prefix="/cards")
 
 
 def login_required(view):

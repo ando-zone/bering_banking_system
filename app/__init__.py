@@ -29,10 +29,10 @@ def create_app():
     from . import models
 
     # blueprint
-    from .views import main_views, auth_views, account_views, card_views
+    from .views import main_views, auth_views, accounts_views, cards_views
     app.register_blueprint(main_views.bp)
     app.register_blueprint(auth_views.bp)
-    app.register_blueprint(account_views.bp)
-    app.register_blueprint(card_views.bp)
+    app.register_blueprint(accounts_views.bp)
+    app.register_blueprint(cards_views.bp)
 
     return app

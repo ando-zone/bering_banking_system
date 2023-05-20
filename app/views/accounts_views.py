@@ -7,7 +7,7 @@ from flask.views import MethodView
 from app.models import Account, User, Card, AccountNumber
 from app import db
 
-bp = Blueprint("account", __name__, url_prefix="/account")
+bp = Blueprint("accounts", __name__, url_prefix="/accounts")
 
 
 @bp.before_app_request
