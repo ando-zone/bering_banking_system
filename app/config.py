@@ -4,6 +4,8 @@ import os
 BASE_DIR = os.path.dirname(__file__)
 ROOT_DIR = os.path.dirname(BASE_DIR)
 
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+BANK_ID = "555511"
 
 def get_db_uri():
     protocol = os.getenv("db_protocol","")
