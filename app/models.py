@@ -23,6 +23,18 @@ class User(db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def to_dict(self):
+        account_count = len(self.accounts)
+        card_count = len(self.cards)
+
+        return {
+            "id": self.id,
+            "e-mail": self.email,
+            "name": self.name,
+            "account_count": account_count,
+            "card_count": card_count
+        }
+
 
 class AccountNumber(db.Model):
     number = db.Column(db.String(12), primary_key=True)

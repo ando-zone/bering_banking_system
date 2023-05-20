@@ -1,21 +1,47 @@
-from flask import (
-    Blueprint,
-    request,
-    session,
-    redirect,
-    url_for,
-    jsonify,
-    g
-)
+import functools
+
+from flask import Blueprint, request, session, jsonify, g, redirect, url_for
+from flask.views import MethodView
 
 from app.models import User
 from app import db
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
-@bp.route("/create_user", methods=("GET", "POST",))
-def create_user():
-    if request.method == "POST":
+
+@bp.before_app_request
+def load_logged_in_user():
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = User.query.get(user_id)
+
+
+def login_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for("auth.login"))
+
+        return view(**kwargs)
+
+    return wrapped_view
+
+
+class MeView(MethodView):
+    decorators = [login_required]
+
+    def get(self):
+        user_id = g.user.id
+        user = User.query.get(user_id)
+
+        return jsonify(user.to_dict()), 200
+
+
+class UserCreateView(MethodView):
+    def post(self):
         username = request.json.get("username")
         email = request.json.get("email")
         password = request.json.get("password")
@@ -37,14 +63,16 @@ def create_user():
             return jsonify({"message": "Account created successfully"})
 
         return jsonify({"error": error}), 400
-    
-    return jsonify({"message": "Please Sign into Bering Bank!"}), 200
 
 
-# TODO@Ando: 근데 현금 인출 및 예금 기능에 로그인이 필요한가? YES
-@bp.route("/login", methods=("GET", "POST",))
-def login():
-    if request.method == "POST":
+class LogInView(MethodView):
+    def get(self):
+        if g.user:
+            return jsonify({"message": "You are already logged in!"}), 200
+
+        return jsonify({"message": "Please Log into Bering Bank!"}), 200
+
+    def post(self):
         username = request.json.get("username")
         password = request.json.get("password")
         error = None
@@ -61,28 +89,18 @@ def login():
             session["user_id"] = user.id
             return jsonify({"message": "Logged in successfully"})
 
-        return jsonify({"error": error}), 401
-
-    if g.user:
-        return jsonify({"message": "You are already logged in!"}), 200
-
-    return jsonify({"message": "Please Log into Bering Bank!"}), 200
+        return jsonify({"error": error}), 400
 
 
-@bp.before_app_request
-def load_logged_in_user():
-    user_id = session.get("user_id")
+class LogOutView(MethodView):
+    decorators = [login_required]
 
-    if user_id is None:
-        g.user = None
-    else:
-        g.user = User.query.get(user_id)
-
-
-@bp.route("/logout")
-def logout():
-    if g.user is not None:
+    def post(self):
         session.clear()
         return jsonify({"message": "Logged out successfully"})
 
-    return redirect(url_for("auth.login"))
+
+bp.add_url_rule("/me", view_func=MeView.as_view("me"))
+bp.add_url_rule("/create", view_func=UserCreateView.as_view("create_user"))
+bp.add_url_rule("/login", view_func=LogInView.as_view("login"))
+bp.add_url_rule("/logout", view_func=LogOutView.as_view("logout"))
