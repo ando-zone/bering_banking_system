@@ -1,3 +1,5 @@
+from enum import Enum as PyEnum
+from sqlalchemy import Enum
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
@@ -81,29 +83,38 @@ class Account(db.Model):
         }
 
 
-class Card(db.Model):
-    def __init__(self):
-        self.state = Disabled()
+class CardStatus(PyEnum):
+    ENABLED = "ENABLED"
+    DISABLED = "DISABLED"
 
+
+class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     card_number = db.Column(db.String(16), unique=True, nullable=False)  # unique card number
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # reference to the User
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)  # reference to the Account
+    state = db.Column(Enum(CardStatus), nullable=False, default=CardStatus.DISABLED) 
 
     def enable(self):
-        self.state = Enabled()
+        self.state = CardStatus.ENABLED
 
     def disable(self):
-        self.state = Disabled()
+        self.state = CardStatus.DISABLED
 
     def verify_owner(self, user):
         return self.user_id == user.id
 
     def withdraw(self, account, amount):
-        return self.state.withdraw(account, amount)
+        if self.state == CardStatus.ENABLED:
+            return Enabled().withdraw(account, amount)
+        else:
+            return Disabled().withdraw(account, amount)
 
     def deposit(self, account, amount):
-        return self.state.deposit(account, amount)
+        if self.state == CardStatus.ENABLED:
+            return Enabled().deposit(account, amount)
+        else:
+            return Disabled().deposit(account, amount)
 
     def to_dict(self):
         return {
@@ -111,5 +122,5 @@ class Card(db.Model):
             "user_name": self.user.name,
             "account_id": self.account.id,
             "card_number": self.card_number,
-            "status": self.state.__class__.__name__.lower()
+            "status": self.state.value.lower()
         }
