@@ -26,6 +26,7 @@ uvloop = "*"
 flask = "^2.3.2"
 flask-migrate = "^4.0.4"
 black = "^23.3.0"
+flask-login = "^0.6.2"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
