@@ -1,6 +1,6 @@
 import random
 
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, jsonify, request, g, current_app
 from flask.views import MethodView
 
 from app import db
@@ -33,12 +33,12 @@ class AccountListView(MethodView):
             error = "Password is required."
 
         if error is None:
-            # TODO@Ando: config에서 은행 식별 번호 가져오기.
-            account_number = "555511" + "".join(
+            bank_id = current_app.config.get("BANK_ID")
+            account_number = bank_id + "".join(
                 random.choice("0123456789") for _ in range(7)
             )
             while AccountNumber.query.get(account_number) is not None:
-                account_number = "555511" + "".join(
+                account_number = bank_id + "".join(
                     random.choice("0123456789") for _ in range(7)
                 )
 
