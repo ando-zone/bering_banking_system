@@ -35,14 +35,14 @@ def create_app():
 
     # blueprint
     from .views import (
-        main_views,
+        index_views,
         auth_views,
         accounts_views,
         cards_views,
         users_views,
     )
 
-    app.register_blueprint(main_views.bp)
+    app.register_blueprint(index_views.bp)
     app.register_blueprint(auth_views.bp)
     app.register_blueprint(users_views.bp)
     app.register_blueprint(accounts_views.bp)
