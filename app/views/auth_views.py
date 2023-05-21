@@ -1,6 +1,15 @@
 import functools
 
-from flask import Blueprint, request, session, jsonify, g, redirect, url_for, current_app
+from flask import (
+    Blueprint,
+    request,
+    session,
+    jsonify,
+    g,
+    redirect,
+    url_for,
+    current_app,
+)
 from flask.views import MethodView
 
 from app.models import User
@@ -47,9 +56,10 @@ class MeView(MethodView):
         user_id = g.user.id
         user = User.query.get(user_id)
 
-        username = request.json.get('name')
-        current_password = request.json.get('current_password')
-        new_password = request.json.get('new_password')
+        username = request.json.get("name")
+        current_password = request.json.get("current_password")
+        new_password = request.json.get("new_password")
+        new_password_again = request.json.get("new_password_again")
 
         error = None
 
@@ -61,14 +71,20 @@ class MeView(MethodView):
         if username:
             user.name = username
 
+        if new_password != new_password_again:
+            error = "Two passwords are not equal to each other."
+
         if new_password and error is None:
             user.password = new_password
         elif error is not None:
+            current_app.logger.error(error)
+
             return jsonify({"error": error}), 400
 
         db.session.commit()
-        current_app.logger.info(f"Updated username for user id {user_id}")
-        current_app.logger.info(f"Updated password for user id {user_id}")
+        current_app.logger.info(
+            f"Account updated successfully for user id {user_id}"
+        )
 
         return jsonify(user.to_dict()), 200
 
@@ -142,7 +158,9 @@ class LogInView(MethodView):
 
             return jsonify({"message": "Logged in successfully"})
 
-        current_app.logger.error(f"Login attempt failed for user {username}: {error}")
+        current_app.logger.error(
+            f"Login attempt failed for user {username}: {error}"
+        )
 
         return jsonify({"error": error}), 400
 
