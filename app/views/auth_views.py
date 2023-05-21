@@ -81,11 +81,11 @@ class LogInView(MethodView):
         return jsonify({"message": "Please Log into Bering Bank!"}), 200
 
     def post(self):
-        username = request.json.get("username")
+        email = request.json.get("email")
         password = request.json.get("password")
         error = None
 
-        user = User.query.filter_by(name=username).first()
+        user = User.query.filter_by(email=email).first()
 
         if user is None:
             error = "Incorrect username."
@@ -95,12 +95,12 @@ class LogInView(MethodView):
         if error is None:
             session.clear()
             session["user_id"] = user.id
-            current_app.logger.info(f"User {username} logged in successfully.")
+            current_app.logger.info(f"User {email} logged in successfully.")
 
             return jsonify({"message": "Logged in successfully"})
 
         current_app.logger.error(
-            f"Login attempt failed for user {username}: {error}"
+            f"Login attempt failed for user {email}: {error}"
         )
 
         return jsonify({"error": error}), 400
