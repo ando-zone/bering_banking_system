@@ -107,7 +107,12 @@ class AccountView(MethodView):
                     400,
                 )
             elif new_password != new_password_again:
-                return jsonify({"error":  "Two passwords are not equal to each other."}), 400
+                return (
+                    jsonify(
+                        {"error": "Two passwords are not equal to each other."}
+                    ),
+                    400,
+                )
 
             is_verified_password = account.verify_password(current_password)
             if not is_verified_password:
