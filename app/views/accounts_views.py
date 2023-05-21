@@ -88,10 +88,13 @@ class AccountView(MethodView):
         if account.user_id != g.user.id:
             return jsonify({"error": "Permission denied"}), 403
 
-        account.name = request.json.get("name", account.name)
+        account_name = request.json.get("name", None)
         current_password = request.json.get("current_password", None)
         new_password = request.json.get("new_password", None)
         new_password_again = request.json.get("new_password_again", None)
+
+        if account_name:
+            account.name = account_name
 
         if new_password:
             if current_password is None:

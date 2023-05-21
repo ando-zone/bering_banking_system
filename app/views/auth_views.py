@@ -65,10 +65,6 @@ class MeView(MethodView):
 
         if username:
             user.name = username
-            db.session.commit()
-            current_app.logger.info(
-                f"Username updated successfully for user id {user_id}"
-            )
 
         if new_password:
             if not current_password:
@@ -83,10 +79,11 @@ class MeView(MethodView):
                 return jsonify({"error": error}), 400
 
             user.password = new_password
-            db.session.commit()
-            current_app.logger.info(
-                f"Password updated successfully for user id {user_id}"
-            )
+
+        db.session.commit()
+        current_app.logger.info(
+            f"User info updated successfully for user id {user_id}"
+        )
 
         return jsonify(user.to_dict()), 200
 
