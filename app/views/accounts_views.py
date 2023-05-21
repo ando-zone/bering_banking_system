@@ -89,11 +89,12 @@ class AccountView(MethodView):
             return jsonify({"error": "Permission denied"}), 403
 
         account.name = request.json.get("name", account.name)
-        previous_password = request.json.get("previous_password", None)
+        current_password = request.json.get("current_password", None)
         new_password = request.json.get("new_password", None)
+        new_password_again = request.json.get("new_password_again", None)
 
         if new_password:
-            if previous_password is None:
+            if current_password is None:
                 return (
                     jsonify(
                         {
@@ -102,8 +103,10 @@ class AccountView(MethodView):
                     ),
                     400,
                 )
+            elif new_password != new_password_again:
+                return jsonify({"error":  "Two passwords are not equal to each other."}), 400
 
-            is_verified_password = account.verify_password(previous_password)
+            is_verified_password = account.verify_password(current_password)
             if not is_verified_password:
                 return jsonify({"error": "Incorrect previous password"}), 400
 

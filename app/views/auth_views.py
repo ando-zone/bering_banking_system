@@ -56,35 +56,37 @@ class MeView(MethodView):
         user_id = g.user.id
         user = User.query.get(user_id)
 
-        username = request.json.get("name")
-        current_password = request.json.get("current_password")
-        new_password = request.json.get("new_password")
-        new_password_again = request.json.get("new_password_again")
+        username = request.json.get("name", None)
+        current_password = request.json.get("current_password", None)
+        new_password = request.json.get("new_password", None)
+        new_password_again = request.json.get("new_password_again", None)
 
         error = None
 
-        if not current_password:
-            error = "Current password is required."
-        elif not user.verify_password(current_password):
-            error = "Current password is incorrect."
-
         if username:
             user.name = username
+            db.session.commit()
+            current_app.logger.info(
+                f"Username updated successfully for user id {user_id}"
+            )
 
-        if new_password != new_password_again:
-            error = "Two passwords are not equal to each other."
+        if new_password:
+            if not current_password:
+                error = "Current password is required."
+            elif not user.verify_password(current_password):
+                error = "Current password is incorrect."
+            elif new_password != new_password_again:
+                error = "Two new passwords are not equal to each other."
 
-        if new_password and error is None:
+            if error is not None:
+                current_app.logger.error(error)
+                return jsonify({"error": error}), 400
+
             user.password = new_password
-        elif error is not None:
-            current_app.logger.error(error)
-
-            return jsonify({"error": error}), 400
-
-        db.session.commit()
-        current_app.logger.info(
-            f"Account updated successfully for user id {user_id}"
-        )
+            db.session.commit()
+            current_app.logger.info(
+                f"Password updated successfully for user id {user_id}"
+            )
 
         return jsonify(user.to_dict()), 200
 
