@@ -12,21 +12,24 @@ class CardState(ABC):
 
 
 class Enabled(CardState):
-    def withdraw(self, account: 'app.models.Account', amount: int):
+    def withdraw(self, account: "app.models.Account", amount: int):
         if account.balance >= amount:
             account.balance -= amount
-            return True, f"Withdrawing {amount} from active card. Now balance: {account.balance}"
+            return (
+                True,
+                f"Withdrawing {amount} from active card. Now balance: {account.balance}",
+            )
         else:
             return False, "FAILED: Insufficient balance for withdrawal."
 
-    def deposit(self, account: 'app.models.Account', amount: int):
+    def deposit(self, account: "app.models.Account", amount: int):
         account.balance += amount
         return f"Depositing {amount} to active card. Now balance: {account.balance}"
 
 
 class Disabled(CardState):
-    def withdraw(self, account: 'app.models.Account', amount: int):
+    def withdraw(self, account: "app.models.Account", amount: int):
         return "Cannot withdraw. Card is blocked."
 
-    def deposit(self, account: 'app.models.Account', amount: int):
+    def deposit(self, account: "app.models.Account", amount: int):
         return "Cannot deposit. Card is blocked."
