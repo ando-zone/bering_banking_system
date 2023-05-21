@@ -10,13 +10,13 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), nullable=False, unique=True)
     name = db.Column(db.String(100), nullable=False)
-    password_hash = db.Column(db.String(128))  # storing password hash instead of plaintext
-    accounts = db.relationship('Account', backref='user', lazy=True)
-    cards = db.relationship('Card', backref='user', lazy=True)
+    password_hash = db.Column(db.String(128))
+    accounts = db.relationship("Account", backref="user", lazy=True)
+    cards = db.relationship("Card", backref="user", lazy=True)
 
     @property
     def password(self):
-        raise AttributeError('password is not a readable attribute')
+        raise AttributeError("password is not a readable attribute")
 
     @password.setter
     def password(self, password):
@@ -34,7 +34,7 @@ class User(db.Model):
             "e-mail": self.email,
             "name": self.name,
             "account_count": account_count,
-            "card_count": card_count
+            "card_count": card_count,
         }
 
 
@@ -48,12 +48,12 @@ class Account(db.Model):
     name = db.Column(db.String(100), nullable=False)
     password_hash = db.Column(db.String(128))
     balance = db.Column(db.Integer, default=0)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    cards = db.relationship('Card', backref='account', lazy=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    cards = db.relationship("Card", backref="account", lazy=True)
 
     @property
     def password(self):
-        raise AttributeError('password is not a readable attribute')
+        raise AttributeError("password is not a readable attribute")
 
     @password.setter
     def password(self, password):
@@ -68,7 +68,7 @@ class Account(db.Model):
             "account_number": self.account_number,
             "account_owner": self.user.name,
             "name": self.name,
-            "balance": self.balance
+            "balance": self.balance,
         }
 
     def to_dict_in_detail(self):
@@ -79,7 +79,7 @@ class Account(db.Model):
             "account_owner": self.user.name,
             "name": self.name,
             "balance": self.balance,
-            "cards": card_ids
+            "cards": card_ids,
         }
 
 
@@ -91,9 +91,13 @@ class CardStatus(PyEnum):
 class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     card_number = db.Column(db.String(16), unique=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
-    state = db.Column(Enum(CardStatus), nullable=False, default=CardStatus.DISABLED) 
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    account_id = db.Column(
+        db.Integer, db.ForeignKey("account.id"), nullable=False
+    )
+    state = db.Column(
+        Enum(CardStatus), nullable=False, default=CardStatus.DISABLED
+    )
 
     def enable(self):
         self.state = CardStatus.ENABLED
@@ -122,5 +126,5 @@ class Card(db.Model):
             "user_name": self.user.name,
             "account_id": self.account.id,
             "card_number": self.card_number,
-            "status": self.state.value.lower()
+            "status": self.state.value.lower(),
         }
