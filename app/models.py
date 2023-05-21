@@ -46,7 +46,7 @@ class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     account_number = db.Column(db.String(12), nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    password_hash = db.Column(db.String(128))  # storing password hash instead of plaintext
+    password_hash = db.Column(db.String(128))
     balance = db.Column(db.Integer, default=0)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     cards = db.relationship('Card', backref='account', lazy=True)
@@ -90,9 +90,9 @@ class CardStatus(PyEnum):
 
 class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    card_number = db.Column(db.String(16), unique=True, nullable=False)  # unique card number
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # reference to the User
-    account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)  # reference to the Account
+    card_number = db.Column(db.String(16), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     state = db.Column(Enum(CardStatus), nullable=False, default=CardStatus.DISABLED) 
 
     def enable(self):
