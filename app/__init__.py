@@ -10,11 +10,15 @@ db = SQLAlchemy()
 migrate = Migrate()
 
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = get_db_uri()
-    app.config["SECRET_KEY"] = get_secret_key()
-    app.config.from_pyfile("config.py")
+
+    if test_config is None:
+        app.config["SQLALCHEMY_DATABASE_URI"] = get_db_uri()
+        app.config["SECRET_KEY"] = get_secret_key()
+        app.config.from_pyfile("config.py")
+    else:
+        app.config.update(test_config)
 
     # logging
     logging.basicConfig(
