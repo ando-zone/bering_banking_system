@@ -18,6 +18,9 @@ class AccountListView(MethodView):
         accounts = Account.query.filter_by(user_id=user_id).all()
 
         accounts_list = [account.to_dict() for account in accounts]
+        current_app.logger.info(
+            f"Fetched {len(accounts_list)} accounts for user id {user_id}"
+        )
 
         return jsonify({"accounts": accounts_list}), 200
 
@@ -25,6 +28,7 @@ class AccountListView(MethodView):
         user_id = g.user.id
         name = request.json.get("name")
         password = request.json.get("password")
+
         error = None
 
         if not name:
@@ -52,6 +56,11 @@ class AccountListView(MethodView):
             db.session.add(new_account_number)
             db.session.add(new_account)
             db.session.commit()
+
+            current_app.logger.info(
+                f"Account created successfully for user id {user_id}"
+            )
+
             return (
                 jsonify(
                     {
@@ -61,6 +70,8 @@ class AccountListView(MethodView):
                 ),
                 201,
             )
+
+        current_app.logger.error(error)
 
         return jsonify({"error": error}), 400
 
@@ -72,10 +83,18 @@ class AccountView(MethodView):
         account = Account.query.get(account_id)
 
         if account is None:
+            current_app.logger.error(f"Account id {account_id} not found")
+
             return jsonify({"error": "Account not found"}), 404
 
         if account.user_id != g.user.id:
-            return jsonify({"error": "Permission denied"}), 403
+            current_app.logger.error(
+                f"Not authorized for user id {g.user.id} for account id {account_id}"
+            )
+
+            return jsonify({"error": "Not authorized"}), 403
+
+        current_app.logger.info(f"Fetched details for account id {account_id}")
 
         return jsonify(account.to_dict_in_detail()), 200
 
@@ -83,10 +102,16 @@ class AccountView(MethodView):
         account = Account.query.get(account_id)
 
         if account is None:
+            current_app.logger.error(f"Account id {account_id} not found")
+
             return jsonify({"error": "Account not found"}), 404
 
         if account.user_id != g.user.id:
-            return jsonify({"error": "Permission denied"}), 403
+            current_app.logger.error(
+                f"Not authorized for user id {g.user.id} for account id {account_id}"
+            )
+
+            return jsonify({"error": "Not authorized"}), 403
 
         account_name = request.json.get("name", None)
         current_password = request.json.get("current_password", None)
@@ -98,6 +123,10 @@ class AccountView(MethodView):
 
         if new_password:
             if current_password is None:
+                current_app.logger.error(
+                    "Previous password is required to change password"
+                )
+
                 return (
                     jsonify(
                         {
@@ -107,6 +136,10 @@ class AccountView(MethodView):
                     400,
                 )
             elif new_password != new_password_again:
+                current_app.logger.error(
+                    "Two passwords are not equal to each other."
+                )
+
                 return (
                     jsonify(
                         {"error": "Two passwords are not equal to each other."}
@@ -116,11 +149,15 @@ class AccountView(MethodView):
 
             is_verified_password = account.verify_password(current_password)
             if not is_verified_password:
+                current_app.logger.error("Incorrect previous password")
+
                 return jsonify({"error": "Incorrect previous password"}), 400
 
             account.password = new_password
 
         db.session.commit()
+
+        current_app.logger.info(f"Account id {account_id} updated successfully")
 
         return (
             jsonify(
@@ -136,13 +173,21 @@ class AccountView(MethodView):
         account = Account.query.get(account_id)
 
         if account is None:
+            current_app.logger.error(f"Account id {account_id} not found")
+
             return jsonify({"error": "Account not found"}), 404
 
         if account.user_id != g.user.id:
-            return jsonify({"error": "Permission denied"}), 403
+            current_app.logger.error(
+                f"Not authorized for user id {g.user.id} for account id {account_id}"
+            )
+
+            return jsonify({"error": "Not authorized"}), 403
 
         db.session.delete(account)
         db.session.commit()
+
+        current_app.logger.info(f"Account id {account_id} deleted successfully")
 
         return jsonify({"message": "Account deleted successfully"}), 200
 
@@ -157,6 +202,8 @@ class AccountCardListView(MethodView):
         ).all()
 
         cards_list = [card.to_dict() for card in cards]
+
+        current_app.logger.info(f"Fetched cards for account id {account_id}")
 
         return jsonify({"cards": cards_list}), 200
 
@@ -180,6 +227,11 @@ class AccountCardListView(MethodView):
             )
             db.session.add(new_card)
             db.session.commit()
+
+            current_app.logger.info(
+                f"Card registered successfully for account id {account_id}"
+            )
+
             return (
                 jsonify(
                     {
@@ -189,6 +241,8 @@ class AccountCardListView(MethodView):
                 ),
                 201,
             )
+
+        current_app.logger.error(error)
 
         return jsonify({"error": error}), 400
 
@@ -200,10 +254,22 @@ class AccountCardView(MethodView):
         card = Card.query.filter_by(id=card_id, account_id=account_id).first()
 
         if card is None:
+            current_app.logger.error(
+                f"Card id {card_id} not found for account id {account_id}"
+            )
+
             return jsonify({"error": "Card not found"}), 404
 
         if card.user_id != g.user.id:
-            return jsonify({"error": "Permission denied"}), 403
+            current_app.logger.error(
+                f"Not authorized for user id {g.user.id} for card id {card_id}"
+            )
+
+            return jsonify({"error": "Not authorized"}), 403
+
+        current_app.logger.info(
+            f"Fetched card id {card_id} for account id {account_id}"
+        )
 
         return jsonify(card.to_dict()), 200
 
@@ -211,13 +277,25 @@ class AccountCardView(MethodView):
         card = Card.query.filter_by(id=card_id, account_id=account_id).first()
 
         if card is None:
+            current_app.logger.error(
+                f"Card id {card_id} not found for account id {account_id}"
+            )
+
             return jsonify({"error": "Card not found"}), 404
 
         if card.user_id != g.user.id:
-            return jsonify({"error": "Permission denied"}), 403
+            current_app.logger.error(
+                f"Not authorized for user id {g.user.id} for card id {card_id}"
+            )
+
+            return jsonify({"error": "Not authorized"}), 403
 
         db.session.delete(card)
         db.session.commit()
+
+        current_app.logger.info(
+            f"Card id {card_id} deleted successfully for account id {account_id}"
+        )
 
         return jsonify({"message": "Card deleted successfully"}), 200
 
