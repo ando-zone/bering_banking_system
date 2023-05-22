@@ -65,7 +65,7 @@ def create_test_account(user_id):
 
 
 def create_test_card(user_id, account_id):
-    card_number = "".join(random.choice("0123456789") for _ in range(12))
+    card_number = "".join(random.choice("0123456789") for _ in range(16))
     card = Card(user_id=user_id, account_id=account_id, card_number=card_number)
     db.session.add(card)
     db.session.commit()
