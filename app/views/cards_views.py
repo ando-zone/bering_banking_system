@@ -142,17 +142,18 @@ class WithdrawView(MethodView):
         is_successful, message = card.withdraw(account, amount)
         db.session.commit()
 
+        balance = card.account.balance
         if is_successful:
-            current_app.logger.info(message)
+            current_app.logger.info(f"{message}, now balance: {balance}")
         else:
-            current_app.logger.warning(message)
+            current_app.logger.warning(f"{message}, now balance: {balance}")
 
         return (
             jsonify(
                 {
                     "message": message,
                     "card": card.to_dict(),
-                    "balance": card.account.balance,
+                    "balance": balance,
                 }
             ),
             200,
@@ -190,14 +191,15 @@ class DepositView(MethodView):
         message = card.deposit(account, amount)
         db.session.commit()
 
-        current_app.logger.info(message)
+        balance = card.account.balance
+        current_app.logger.info(f"{message}, now balance: {balance}")
 
         return (
             jsonify(
                 {
-                    "message": "Deposit successful",
+                    "message": message,
                     "card": card.to_dict(),
-                    "balance": card.account.balance,
+                    "balance": balance,
                 }
             ),
             200,
@@ -221,9 +223,12 @@ class BalanceView(MethodView):
 
             return jsonify({"error": error_msg}), 403
 
-        current_app.logger.info("Balance check successful")
+        balance = card.account.balance
+        current_app.logger.info(
+            f"Balance check successful, now balance: {balance}"
+        )
 
-        return jsonify({"balance": card.account.balance}), 200
+        return jsonify({"balance": balance}), 200
 
 
 bp.add_url_rule("/", view_func=CardListView.as_view("card"))
