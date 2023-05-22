@@ -10,6 +10,34 @@ from app.views.auth_views import login_required
 bp = Blueprint("accounts", __name__, url_prefix="/accounts")
 
 
+def create_account_number() -> str:
+    """새로운 계좌 번호를 생성하는 메서드.
+
+    Note:
+        만약 새롭게 생성한 계좌 번호가 Database에서 특정 계좌가 이미 사용하고 있거나
+        현재 소멸된 계좌가 사용했던 번호일 경우, 새로운 번호를 겹치지 않을 때 까지 재생성함.
+        이미 다른 계좌가 사용하고 있는 계좌 번호 혹은 소멸된 계좌가 사용했던 계좌 번호 모두
+        AccountNumber 모델을 통해 확인할 수 있다.
+
+    Returns:
+        str: 13자리의 계좌 번호이며 앞 6자리는 은행 식별 번호가 포함된다.
+
+    Examples:
+        >>> create_account_number()
+        "5555110123456"
+    """
+    bank_id = current_app.config.get("BANK_ID")
+    account_number = bank_id + "".join(
+        random.choice("0123456789") for _ in range(7)
+    )
+    while AccountNumber.query.get(account_number) is not None:
+        account_number = bank_id + "".join(
+            random.choice("0123456789") for _ in range(7)
+        )
+
+    return account_number
+
+
 class AccountListView(MethodView):
     decorators = [login_required]
 
@@ -37,15 +65,7 @@ class AccountListView(MethodView):
             error = "Password is required."
 
         if error is None:
-            bank_id = current_app.config.get("BANK_ID")
-            account_number = bank_id + "".join(
-                random.choice("0123456789") for _ in range(7)
-            )
-            while AccountNumber.query.get(account_number) is not None:
-                account_number = bank_id + "".join(
-                    random.choice("0123456789") for _ in range(7)
-                )
-
+            account_number = create_account_number()
             new_account = Account(
                 user_id=user_id,
                 name=name,
