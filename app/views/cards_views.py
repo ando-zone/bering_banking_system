@@ -151,7 +151,7 @@ class WithdrawView(MethodView):
             jsonify(
                 {
                     "message": "Withdrawl successful",
-                    "account": card.to_dict(),
+                    "card": card.to_dict(),
                 }
             ),
             200,
@@ -195,7 +195,7 @@ class DepositView(MethodView):
             jsonify(
                 {
                     "message": "Deposit successful",
-                    "account": card.to_dict(),
+                    "card": card.to_dict(),
                 }
             ),
             200,
