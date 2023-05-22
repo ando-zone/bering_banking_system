@@ -25,7 +25,7 @@ class CardView(MethodView):
     decorators = [login_required]
 
     def get(self, card_id):
-        card = Card.query.get(card_id)
+        card = db.session.get(Card, card_id)
         if card is None:
             error_msg = "Card not found"
             current_app.logger.error(error_msg)
@@ -45,7 +45,7 @@ class EnableCardView(MethodView):
     decorators = [login_required]
 
     def put(self, card_id):
-        card = Card.query.get(card_id)
+        card = db.session.get(Card, card_id)
         if card is None:
             error_msg = "Card not found"
             current_app.logger.error(error_msg)
@@ -76,7 +76,7 @@ class DisableCardView(MethodView):
     decorators = [login_required]
 
     def put(self, card_id):
-        card = Card.query.get(card_id)
+        card = db.session.get(Card, card_id)
         if card is None:
             error_msg = "Card not found"
             current_app.logger.error(error_msg)
@@ -107,7 +107,7 @@ class WithdrawView(MethodView):
     decorators = [login_required]
 
     def post(self, card_id):
-        card = Card.query.get(card_id)
+        card = db.session.get(Card, card_id)
         if card is None:
             error_msg = "Card not found"
             current_app.logger.error(error_msg)
@@ -121,7 +121,7 @@ class WithdrawView(MethodView):
             return jsonify({"error": error_msg}), 403
 
         account_id = card.account.id
-        account = Account.query.get(account_id)
+        account = db.session.get(Account, account_id)
 
         if account is None:
             error_msg = "Account not found"
@@ -164,7 +164,7 @@ class DepositView(MethodView):
     decorators = [login_required]
 
     def post(self, card_id):
-        card = Card.query.get(card_id)
+        card = db.session.get(Card, card_id)
         if card is None:
             error_msg = "Card not found"
             current_app.logger.error(error_msg)
@@ -178,7 +178,7 @@ class DepositView(MethodView):
             return jsonify({"error": error_msg}), 403
 
         account_id = card.account.id
-        account = Account.query.get(account_id)
+        account = db.session.get(Account, account_id)
 
         if account is None:
             error_msg = "Account not found"
@@ -210,7 +210,7 @@ class BalanceView(MethodView):
     decorators = [login_required]
 
     def get(self, card_id):
-        card = Card.query.get(card_id)
+        card = db.session.get(Card, card_id)
         if card is None:
             error_msg = "Card not found"
             current_app.logger.error(error_msg)

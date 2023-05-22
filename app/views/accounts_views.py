@@ -30,7 +30,7 @@ def create_account_number() -> str:
     account_number = bank_id + "".join(
         random.choice("0123456789") for _ in range(7)
     )
-    while AccountNumber.query.get(account_number) is not None:
+    while db.session.get(AccountNumber, account_number) is not None:
         account_number = bank_id + "".join(
             random.choice("0123456789") for _ in range(7)
         )
