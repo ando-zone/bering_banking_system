@@ -15,16 +15,13 @@ class Enabled(CardState):
     def withdraw(self, account: "app.models.Account", amount: int):
         if account.balance >= amount:
             account.balance -= amount
-            return (
-                True,
-                f"Withdrawing {amount} from active card. Now balance: {account.balance}",
-            )
+            return True, f"Withdrawing {amount} from active card."
         else:
             return False, "FAILED: Insufficient balance for withdrawal."
 
     def deposit(self, account: "app.models.Account", amount: int):
         account.balance += amount
-        return f"Depositing {amount} to active card. Now balance: {account.balance}"
+        return f"Depositing {amount} to active card."
 
 
 class Disabled(CardState):
