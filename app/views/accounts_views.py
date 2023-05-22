@@ -126,6 +126,7 @@ class AccountView(MethodView):
                 current_app.logger.error(
                     "Previous password is required to change password"
                 )
+                db.session.rollback()
 
                 return (
                     jsonify(
@@ -139,6 +140,7 @@ class AccountView(MethodView):
                 current_app.logger.error(
                     "Two passwords are not equal to each other."
                 )
+                db.session.rollback()
 
                 return (
                     jsonify(
@@ -150,6 +152,7 @@ class AccountView(MethodView):
             is_verified_password = account.verify_password(current_password)
             if not is_verified_password:
                 current_app.logger.error("Incorrect previous password")
+                db.session.rollback()
 
                 return jsonify({"error": "Incorrect previous password"}), 400
 

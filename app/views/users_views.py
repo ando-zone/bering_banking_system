@@ -43,6 +43,8 @@ class MeView(MethodView):
 
             if error is not None:
                 current_app.logger.error(error)
+                db.session.rollback()
+
                 return jsonify({"error": error}), 400
 
             user.password = new_password
