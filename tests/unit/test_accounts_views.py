@@ -9,10 +9,12 @@ from app.models import User, Account, Card
 @pytest.fixture
 def app():
     test_config = {
-        "SQLALCHEMY_DATABASE_URI": "sqlite:///{}".format(os.path.join(os.path.dirname(__file__), "test.db")),
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///{}".format(
+            os.path.join(os.path.dirname(__file__), "test.db")
+        ),
         "SECRET_KEY": "test_secret_key",
         "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-        "BANK_ID": "555511"
+        "BANK_ID": "555511",
     }
     app = create_app(test_config)
     with app.app_context():
@@ -38,7 +40,9 @@ def login(client, email, password):
 
 
 def create_test_user():
-    user = User(name="testuser", email="testuser@example.com", password="password123")
+    user = User(
+        name="testuser", email="testuser@example.com", password="password123"
+    )
     db.session.add(user)
     db.session.commit()
     return user
@@ -46,14 +50,21 @@ def create_test_user():
 
 def create_test_account(user_id):
     account_number = "5555111234567"
-    account = Account(user_id=user_id, name="Test Account", password="password", account_number=account_number)
+    account = Account(
+        user_id=user_id,
+        name="Test Account",
+        password="password",
+        account_number=account_number,
+    )
     db.session.add(account)
     db.session.commit()
     return account
 
 
-def create_test_card(account_id):
-    card = Card(account_id=account_id, card_number="1234567890123456")
+def create_test_card(user_id, account_id):
+    card = Card(
+        user_id=user_id, account_id=account_id, card_number="1234567890123456"
+    )
     db.session.add(card)
     db.session.commit()
     return card
@@ -62,7 +73,7 @@ def create_test_card(account_id):
 @mock.patch("app.views.auth_views.current_app.logger")
 def test_get_user_account_unauthenticated(mock_logging, client):
     response = client.get("/accounts/")
-    assert response.status_code == 302  
+    assert response.status_code == 302
     assert response.location == "/auth/login"
 
 
@@ -98,11 +109,11 @@ def test_create_user_account(client):
     assert response.json["message"] == "Account created successfully"
 
 
-def test_account_card_list_view_get(client):
+def test_get_cards_from_account(client):
     user = create_test_user()
     login(client, user.email, "password123")
     account = create_test_account(user.id)
-    card = create_test_card(account.id)
+    card = create_test_card(user.id, account.id)
 
     response = client.get(f"/accounts/{account.id}/cards")
     assert response.status_code == 200
@@ -111,25 +122,34 @@ def test_account_card_list_view_get(client):
     assert response.json["cards"][0]["id"] == card.id
 
 
-def test_account_card_list_view_post(client):
+def test_register_card_to_account(client):
     user = create_test_user()
     login(client, user.email, "password123")
     account = create_test_account(user.id)
 
-    response = client.post(f"/accounts/{account.id}/cards", json={"card_number": "1234567890123456"})
+    response = client.post(
+        f"/accounts/{account.id}/cards",
+        json={"card_number": "1234567890123456"},
+    )
     assert response.status_code == 201
     assert "card" in response.json
     assert response.json["card"]["account_id"] == account.id
     assert response.json["card"]["card_number"] == "1234567890123456"
 
 
-def test_account_card_list_view_post_invalid_card_number(client):
+def test_register_card_to_account_view_already_registered_card_number(client):
     user = create_test_user()
     login(client, user.email, "password123")
     account = create_test_account(user.id)
-    create_test_card(account.id)
+    create_test_card(user.id, account.id)
 
-    response = client.post(f"/accounts/{account.id}/cards", json={"card_number": "1234567890123456"})
+    response = client.post(
+        f"/accounts/{account.id}/cards",
+        json={"card_number": "1234567890123456"},
+    )
     assert response.status_code == 400
     assert "error" in response.json
-    assert response.json["error"] == "A card with number '1234567890123456' is already registered."
+    assert (
+        response.json["error"]
+        == "A card with number '1234567890123456' is already registered."
+    )
