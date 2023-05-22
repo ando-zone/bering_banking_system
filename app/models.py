@@ -10,7 +10,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), nullable=False, unique=True)
     name = db.Column(db.String(100), nullable=False)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(128), nullable=False)
     accounts = db.relationship("Account", backref="user", lazy=True)
     cards = db.relationship("Card", backref="user", lazy=True)
 
@@ -46,7 +46,7 @@ class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     account_number = db.Column(db.String(13), nullable=False, unique=True)
     name = db.Column(db.String(100), nullable=False)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(128), nullable=False)
     balance = db.Column(db.Integer, default=0)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     cards = db.relationship("Card", backref="account", lazy=True)
