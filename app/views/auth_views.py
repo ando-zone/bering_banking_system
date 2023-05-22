@@ -25,7 +25,7 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = User.query.get(user_id)
+        g.user = db.session.get(User, user_id)
         current_app.logger.info(f"Loaded user with id {user_id}")
 
 

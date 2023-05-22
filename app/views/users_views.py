@@ -13,7 +13,7 @@ class MeView(MethodView):
 
     def get(self):
         user_id = g.user.id
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
 
         current_app.logger.info(f"Fetched user info for id {user_id}")
 
@@ -21,7 +21,7 @@ class MeView(MethodView):
 
     def put(self):
         user_id = g.user.id
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
 
         username = request.json.get("name", None)
         current_password = request.json.get("current_password", None)
