@@ -1,5 +1,6 @@
 import os
 import pytest
+import random
 from unittest import mock
 
 from app import db, create_app
@@ -49,7 +50,9 @@ def create_test_user():
 
 
 def create_test_account(user_id):
-    account_number = "5555111234567"
+    account_number = "555511" + "".join(
+        random.choice("0123456789") for _ in range(7)
+    )
     account = Account(
         user_id=user_id,
         name="Test Account",
@@ -62,9 +65,8 @@ def create_test_account(user_id):
 
 
 def create_test_card(user_id, account_id):
-    card = Card(
-        user_id=user_id, account_id=account_id, card_number="1234567890123456"
-    )
+    card_number = "".join(random.choice("0123456789") for _ in range(12))
+    card = Card(user_id=user_id, account_id=account_id, card_number=card_number)
     db.session.add(card)
     db.session.commit()
     return card
