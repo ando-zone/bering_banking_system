@@ -103,7 +103,6 @@ def test_create_user_account(client):
         },
     )
 
-    print(response.json)
     assert response.status_code == 201
     assert "account" in response.json
     assert response.json["account"]["name"] == "Test Account"
@@ -139,7 +138,10 @@ def test_register_card_to_account(client):
     assert response.json["card"]["card_number"] == "1234567890123456"
 
 
-def test_register_card_to_account_view_already_registered_card_number(client):
+@mock.patch("app.views.auth_views.current_app.logger")
+def test_register_card_to_account_view_already_registered_card_number(
+    mock_logging, client
+):
     user = create_test_user()
     login(client, user.email, "password123")
     account = create_test_account(user.id)
