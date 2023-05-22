@@ -143,15 +143,15 @@ def test_register_card_to_account_view_already_registered_card_number(client):
     user = create_test_user()
     login(client, user.email, "password123")
     account = create_test_account(user.id)
-    create_test_card(user.id, account.id)
+    card = create_test_card(user.id, account.id)
 
     response = client.post(
         f"/accounts/{account.id}/cards",
-        json={"card_number": "1234567890123456"},
+        json={"card_number": card.card_number},
     )
     assert response.status_code == 400
     assert "error" in response.json
     assert (
         response.json["error"]
-        == "A card with number '1234567890123456' is already registered."
+        == f"A card with number '{card.card_number}' is already registered."
     )
