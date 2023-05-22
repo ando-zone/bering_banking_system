@@ -44,7 +44,7 @@ class AccountNumber(db.Model):
 
 class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    account_number = db.Column(db.String(13), nullable=False)
+    account_number = db.Column(db.String(13), nullable=False, unique=True)
     name = db.Column(db.String(100), nullable=False)
     password_hash = db.Column(db.String(128))
     balance = db.Column(db.Integer, default=0)
