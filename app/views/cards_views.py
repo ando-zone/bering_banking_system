@@ -152,6 +152,7 @@ class WithdrawView(MethodView):
                 {
                     "message": "Withdrawl successful",
                     "card": card.to_dict(),
+                    "balance": str(card.account.balance),
                 }
             ),
             200,
@@ -196,6 +197,7 @@ class DepositView(MethodView):
                 {
                     "message": "Deposit successful",
                     "card": card.to_dict(),
+                    "balance": str(card.account.balance),
                 }
             ),
             200,
